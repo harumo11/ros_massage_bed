@@ -141,7 +141,9 @@ std::string convert_to_tm_script(std::vector<float> vel_commands)
 
 int main(int argc, char *argv[])
 {
+    ROS_DEBUG_STREAM("Techman control bridge starts");
     ros::init(argc, argv, "techman_control_bridge_node");
+    ros::Rate control_interval(100);
     ROS_INFO_STREAM(ros::master::getHost());
     ROS_INFO_STREAM(ros::master::getURI());
     ros::NodeHandle node_handle;
@@ -150,17 +152,17 @@ int main(int argc, char *argv[])
         ros::console::notifyLoggerLevelsChanged();
     }
 
-    ROS_DEBUG_STREAM("Techman control bridge starts");
     const int velocity_command_receive_port = 50010;
-    ROS_INFO_STREAM("Receive port for techman velocity commands is " << velocity_command_receive_port);
     command_receiver rec(velocity_command_receive_port);
     rec.run();
+    ROS_INFO_STREAM("Receive port for techman velocity commands is " << velocity_command_receive_port);
 
     ros::ServiceClient techman = node_handle.serviceClient<tm_msgs::SendScript>("tm_driver/send_script");
     tm_msgs::SendScript tm_script;
     tm_script.request.id = "bridge";
     tm_script.request.script = "ContinueVLine(50, 1000)";
 
+    ROS_INFO_STREAM("Connection setting to Techman starts.");
     while (ros::ok())
     {
         ros::Duration interval_try_connection(1);
@@ -185,9 +187,40 @@ int main(int argc, char *argv[])
         }
     }
 
-    ROS_INFO_STREAM("Now you can control Techman.");
+    ROS_INFO_STREAM("Now you can control Techman");
     while (ros::ok())
     {
+        tm_script.request.script = convert_to_tm_script(rec.received_commands);
+
+        if (techman.call(tm_script))
+        {
+            if (tm_script.response.ok)
+            {
+                ROS_INFO_STREAM("Sent velocity command script successfully");
+            }
+        }
+        else
+        {
+            ROS_WARN_STREAM("Sent velocity command script, but resposen not ok.");
+        }
+
+        ros::spinOnce();
+        control_interval.sleep();
+    }
+
+    ROS_INFO_STREAM("Shutdown process starts");
+    tm_script.request.script = "StopContinueVmode()";
+
+    if (techman.call(tm_script))
+    {
+        if (tm_script.response.ok)
+        {
+            ROS_INFO_STREAM("Techman velocity mode shutdown.");
+        }
+        else
+        {
+            ROS_WARN_STREAM("Techman velocity mode can not shutdown.");
+        }
     }
 
     return 0;
