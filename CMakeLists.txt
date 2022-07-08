@@ -29,6 +29,6 @@ add_executable(techman_control_bridge src/techman_control_bridge.cpp)
 add_executable(test_techman_control_bridge src/test_techman_control_bridge.cpp)
 
 target_link_libraries(simple_force_massage ${catkin_LIBRARIES})
-target_link_libraries(techman_control_bridge PocoFoundation PocoNet ${catkin_LIBRARIES})
+target_link_libraries(techman_control_bridge ${catkin_LIBRARIES})
 target_link_libraries(test_techman_control_bridge PocoFoundation PocoNet)
 
