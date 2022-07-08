@@ -21,14 +21,14 @@ public:
     command_reciever(const unsigned int port);
     void recieve_loop();
     void run();
-    std::shared_ptr<std::vector<double>> recieved_commands = std::make_shared<std::vector<double>>();
+    std::shared_ptr<std::vector<float>> recieved_commands = std::make_shared<std::vector<float>>();
     bool stop = false;
 
 private:
     boost::asio::io_context io;
     const std::string header = "VELC";
     const std::string footer = ":";
-    std::optional<std::vector<double>> parse_message(const std::string recieved_msg);
+    std::optional<std::vector<float>> parse_message(const std::string recieved_msg);
 };
 
 command_reciever::command_reciever(const unsigned int port)
@@ -40,7 +40,7 @@ command_reciever::command_reciever(const unsigned int port)
     }
 }
 
-std::optional<std::vector<double>> command_reciever::parse_message(const std::string recieved_msg)
+std::optional<std::vector<float>> command_reciever::parse_message(const std::string recieved_msg)
 {
     ROS_DEBUG_STREAM("parse message starts.");
     std::string msg_header_removed = recieved_msg.substr(recieved_msg.find_first_of(this->header) + this->header.size());
@@ -48,10 +48,10 @@ std::optional<std::vector<double>> command_reciever::parse_message(const std::st
 
     boost::char_separator<char> comma(",");
     boost::tokenizer<boost::char_separator<char>> tokenizer(msg_footer_removed, comma);
-    std::vector<double> velocity_commands;
+    std::vector<float> velocity_commands;
     for (auto command : tokenizer)
     {
-        velocity_commands.push_back(std::stod(command));
+        velocity_commands.push_back(std::stof(command));
     }
 
     if (velocity_commands.size() != 6)
@@ -121,6 +121,26 @@ void command_reciever::run()
 {
     std::thread th(&command_reciever::recieve_loop, this);
     th.join();
+}
+
+std::string convert_to_tm_script(std::vector<float> vel_commands)
+{
+    std::vector<float> tm_commands;
+    if (vel_commands.size() != 6)
+    {
+        ROS_WARN_STREAM("The size of given velocity commands is " << vel_commands.size() << "."
+                                                                  << "That size must be 6. The tm script that all elements are zero is created.");
+        tm_commands = {0, 0, 0, 0, 0, 0};
+    }
+    else
+    {
+        std::stringstream tm_script;
+        tm_script << "SetContinueVLine(" << std::fixed << std::setprecision(5)
+                  << tm_commands.at(0) << "," << tm_commands.at(1) << "," << tm_commands.at(2) << ","
+                  << tm_commands.at(3) << "," << tm_commands.at(4) << "," << tm_commands.at(5) << ")";
+
+        return tm_script.str();
+    }
 }
 
 int main(int argc, char *argv[])
