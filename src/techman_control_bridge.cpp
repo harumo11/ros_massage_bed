@@ -12,7 +12,6 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <tm_msgs/SendScript.h>
-#include <ros/ros.h>
 #include <boost/asio.hpp>
 #include <boost/tokenizer.hpp>
 
