@@ -194,15 +194,12 @@ std::string techman::convert_to_tm_script(std::vector<float> vel_commands)
                                                                   << "That size must be 6. The tm script that all elements are zero is created.");
         tm_commands = {0, 0, 0, 0, 0, 0};
     }
-    else
-    {
-        std::stringstream tm_msgs;
-        tm_msgs << "SetContinueVLine(" << std::fixed << std::setprecision(5)
-                << tm_commands.at(0) << "," << tm_commands.at(1) << "," << tm_commands.at(2) << ","
-                << tm_commands.at(3) << "," << tm_commands.at(4) << "," << tm_commands.at(5) << ")";
+    std::stringstream tm_msgs;
+    tm_msgs << "SetContinueVLine(" << std::fixed << std::setprecision(5)
+            << tm_commands.at(0) << "," << tm_commands.at(1) << "," << tm_commands.at(2) << ","
+            << tm_commands.at(3) << "," << tm_commands.at(4) << "," << tm_commands.at(5) << ")";
 
-        return tm_msgs.str();
-    }
+    return tm_msgs.str();
 }
 
 void techman::send_script(const std::string velocity_script)
