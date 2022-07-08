@@ -15,10 +15,10 @@
 #include <boost/asio.hpp>
 #include <boost/tokenizer.hpp>
 
-class command_reciever
+class command_receiver
 {
 public:
-    command_reciever(const unsigned int port);
+    command_receiver(const unsigned int port);
     void recieve_loop();
     void run();
     std::shared_ptr<std::vector<float>> recieved_commands = std::make_shared<std::vector<float>>();
@@ -31,7 +31,7 @@ private:
     std::optional<std::vector<float>> parse_message(const std::string recieved_msg);
 };
 
-command_reciever::command_reciever(const unsigned int port)
+command_receiver::command_receiver(const unsigned int port)
 {
     ROS_DEBUG_STREAM("command reciever starts");
     for (size_t i = 0; i < 6; i++)
@@ -40,7 +40,7 @@ command_reciever::command_reciever(const unsigned int port)
     }
 }
 
-std::optional<std::vector<float>> command_reciever::parse_message(const std::string recieved_msg)
+std::optional<std::vector<float>> command_receiver::parse_message(const std::string recieved_msg)
 {
     ROS_DEBUG_STREAM("parse message starts.");
     std::string msg_header_removed = recieved_msg.substr(recieved_msg.find_first_of(this->header) + this->header.size());
@@ -65,7 +65,7 @@ std::optional<std::vector<float>> command_reciever::parse_message(const std::str
     }
 }
 
-void command_reciever::recieve_loop()
+void command_receiver::recieve_loop()
 {
 
     while (ros::ok())
@@ -117,9 +117,9 @@ void command_reciever::recieve_loop()
     ROS_INFO_STREAM("The connection is closed successfully");
 }
 
-void command_reciever::run()
+void command_receiver::run()
 {
-    std::thread th(&command_reciever::recieve_loop, this);
+    std::thread th(&command_receiver::recieve_loop, this);
     th.join();
 }
 
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
     }
 
     ROS_DEBUG_STREAM("Techman control bridge starts");
-    command_reciever rec(50010);
+    command_receiver rec(50010);
     rec.run();
 
     return 0;
