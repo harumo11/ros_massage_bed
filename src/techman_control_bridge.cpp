@@ -21,7 +21,7 @@ public:
     command_receiver(const unsigned int port);
     void recieve_loop();
     void run();
-    std::shared_ptr<std::vector<float>> recieved_commands = std::make_shared<std::vector<float>>();
+    std::vector<float> received_commands = {0, 0, 0, 0, 0, 0};
     bool stop = false;
 
 private:
@@ -34,10 +34,6 @@ private:
 command_receiver::command_receiver(const unsigned int port)
 {
     ROS_DEBUG_STREAM("command reciever starts");
-    for (size_t i = 0; i < 6; i++)
-    {
-        this->recieved_commands->push_back(0);
-    }
 }
 
 std::optional<std::vector<float>> command_receiver::parse_message(const std::string recieved_msg)
@@ -95,18 +91,18 @@ void command_receiver::recieve_loop()
             if (parsed_velocity_commands.has_value())
             {
                 ROS_DEBUG_STREAM("parse success!");
-                this->recieved_commands->at(0) = parsed_velocity_commands.value().at(0);
-                this->recieved_commands->at(1) = parsed_velocity_commands.value().at(1);
-                this->recieved_commands->at(2) = parsed_velocity_commands.value().at(2);
-                this->recieved_commands->at(3) = parsed_velocity_commands.value().at(3);
-                this->recieved_commands->at(4) = parsed_velocity_commands.value().at(4);
-                this->recieved_commands->at(5) = parsed_velocity_commands.value().at(5);
-                ROS_INFO_STREAM(this->recieved_commands->at(0) << "\t" << this->recieved_commands->at(1) << "\t" << this->recieved_commands->at(2) << "\t" << this->recieved_commands->at(3) << "\t" << this->recieved_commands->at(4) << "\t" << this->recieved_commands->at(5));
+                this->received_commands.at(0) = parsed_velocity_commands.value().at(0);
+                this->received_commands.at(1) = parsed_velocity_commands.value().at(1);
+                this->received_commands.at(2) = parsed_velocity_commands.value().at(2);
+                this->received_commands.at(3) = parsed_velocity_commands.value().at(3);
+                this->received_commands.at(4) = parsed_velocity_commands.value().at(4);
+                this->received_commands.at(5) = parsed_velocity_commands.value().at(5);
+                ROS_INFO_STREAM(this->received_commands.at(0) << "\t" << this->received_commands.at(1) << "\t" << this->received_commands.at(2) << "\t" << this->received_commands.at(3) << "\t" << this->received_commands.at(4) << "\t" << this->received_commands.at(5));
             }
             else
             {
                 ROS_WARN_STREAM("parse NOT success! Velocity commands are set all zero");
-                this->recieved_commands->assign({0, 0, 0, 0, 0, 0});
+                this->received_commands.assign({0, 0, 0, 0, 0, 0});
             }
         }
 
@@ -155,8 +151,44 @@ int main(int argc, char *argv[])
     }
 
     ROS_DEBUG_STREAM("Techman control bridge starts");
-    command_receiver rec(50010);
+    const int velocity_command_receive_port = 50010;
+    ROS_INFO_STREAM("Receive port for techman velocity commands is " << velocity_command_receive_port);
+    command_receiver rec(velocity_command_receive_port);
     rec.run();
+
+    ros::ServiceClient techman = node_handle.serviceClient<tm_msgs::SendScript>("tm_driver/send_script");
+    tm_msgs::SendScript tm_script;
+    tm_script.request.id = "bridge";
+    tm_script.request.script = "ContinueVLine(50, 1000)";
+
+    while (ros::ok())
+    {
+        ros::Duration interval_try_connection(1);
+
+        if (techman.call(tm_script))
+        {
+            if (tm_script.response.ok)
+            {
+                ROS_INFO_STREAM("Sent script to Techman and The connection is established.");
+                break;
+            }
+            else
+            {
+                ROS_ERROR_STREAM("Sent script to Techman, but response not yet ok. Exit.");
+                interval_try_connection.sleep();
+            }
+        }
+        else
+        {
+            ROS_ERROR_STREAM("Can not send script. Is techman node running? Exit.");
+            interval_try_connection.sleep();
+        }
+    }
+
+    ROS_INFO_STREAM("Now you can control Techman.");
+    while (ros::ok())
+    {
+    }
 
     return 0;
 }
