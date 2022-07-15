@@ -246,9 +246,9 @@ int main(int argc, char *argv[])
     {
         arm.send_script(arm.convert_to_tm_script(rec.received_commands));
 
-        ROS_DEBUG_STREAM("spin once");
         ros::spinOnce();
         control_interval.sleep();
+        ROS_DEBUG_STREAM("spin once");
     }
 
     rec_th.join();
