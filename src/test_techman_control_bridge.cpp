@@ -6,14 +6,15 @@
 #include <string>
 #include <thread>
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     Poco::Net::SocketAddress server_address("127.0.0.1", 50010);
     Poco::Net::StreamSocket socket(server_address);
     Poco::Net::SocketStream stream(socket);
 
-    while (true) {
-        std::string command = "VELC0.01,0.02,0.03,0.04,0.05,0.06:";
+    while (true)
+    {
+        std::string command = "VELC0.00,0.00,0.01,0.00,0.00,0.00:";
         std::cout << "sending command : " << command << std::endl;
         stream << command << std::endl;
         //auto send_size = socket.sendBytes(command.c_str(), command.size());
