@@ -2,18 +2,18 @@
 //このプログラムはTCP通信経由でメッセージを受け取りテックマンのスクリプトに
 //変換して速度制御を実行します．
 
-#include <iostream>
-#include <vector>
+#include <boost/asio.hpp>
+#include <boost/tokenizer.hpp>
 #include <chrono>
-#include <string>
+#include <iostream>
 #include <memory>
-#include <thread>
 #include <optional>
 #include <ros/ros.h>
 #include <std_msgs/String.h>
+#include <string>
+#include <thread>
 #include <tm_msgs/SendScript.h>
-#include <boost/asio.hpp>
-#include <boost/tokenizer.hpp>
+#include <vector>
 
 class command_receiver
 {
@@ -52,7 +52,7 @@ std::optional<std::vector<float>> command_receiver::parse_message(const std::str
 
     if (velocity_commands.size() != 6)
     {
-        ROS_WARN_STREAM("Recieved commands size shoulg be 6. But " << velocity_commands.size() << " is given.");
+        ROS_WARN_STREAM("Recieved commands size should be 6. But " << velocity_commands.size() << " is given.");
         return std::nullopt;
     }
     else
@@ -221,10 +221,10 @@ void techman::send_script(const std::string velocity_script)
 
 int main(int argc, char *argv[])
 {
-    ROS_DEBUG_STREAM("Techman control bridge starts");
     ros::init(argc, argv, "techman_control_bridge_node");
-    ros::Rate control_interval(100);
     ros::NodeHandle node_handle;
+    ros::Rate control_interval(100);
+    ROS_DEBUG_STREAM("Techman control bridge starts");
     if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug))
     {
         ros::console::notifyLoggerLevelsChanged();
