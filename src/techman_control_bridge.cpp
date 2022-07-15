@@ -24,6 +24,7 @@ public:
     void run();
     std::vector<float> received_commands = {0, 0, 0, 0, 0, 0};
     bool stop = false;
+    unsigned int user_socket_port_num;
 
 private:
     boost::asio::io_context io;
@@ -34,6 +35,7 @@ private:
 
 command_receiver::command_receiver(const unsigned int port)
 {
+    this->user_socket_port_num = port;
     ROS_DEBUG_STREAM("command reciever starts");
 }
 
@@ -69,7 +71,7 @@ void command_receiver::recieve_loop()
     {
         ROS_DEBUG_STREAM("run starts.");
         ROS_INFO_STREAM("Waiting connection from user application.");
-        boost::asio::ip::tcp::acceptor acceptor(this->io, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 50011));
+        boost::asio::ip::tcp::acceptor acceptor(this->io, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), this->user_socket_port_num));
         boost::asio::ip::tcp::socket socket(this->io);
         acceptor.accept(socket);
         ROS_INFO_STREAM(socket.remote_endpoint());
@@ -234,7 +236,7 @@ int main(int argc, char *argv[])
         ros::console::notifyLoggerLevelsChanged();
     }
 
-    const int velocity_command_receive_port = 50010;
+    const int velocity_command_receive_port = 50011;
     command_receiver rec(velocity_command_receive_port);
     ROS_DEBUG_STREAM("before thread runs");
     std::thread rec_th(&command_receiver::recieve_loop, &rec);
