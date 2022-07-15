@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(ros_massage_bed)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_definitions("-std=c++20")
 
@@ -20,6 +21,8 @@ find_package(catkin REQUIRED COMPONENTS
 	std_msgs
 	)
 
+find_package(Boost REQUIRED)
+
 catkin_package()
 
 include_directories(${catkin_INCLUDE_DIRS})
@@ -29,6 +32,6 @@ add_executable(techman_control_bridge src/techman_control_bridge.cpp)
 add_executable(test_techman_control_bridge src/test_techman_control_bridge.cpp)
 
 target_link_libraries(simple_force_massage ${catkin_LIBRARIES})
-target_link_libraries(techman_control_bridge ${catkin_LIBRARIES})
+target_link_libraries(techman_control_bridge glog ${catkin_LIBRARIES})
 target_link_libraries(test_techman_control_bridge PocoFoundation PocoNet)
 

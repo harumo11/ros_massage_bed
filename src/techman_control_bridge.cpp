@@ -5,6 +5,7 @@
 #include <boost/asio.hpp>
 #include <boost/tokenizer.hpp>
 #include <chrono>
+#include <glog/logging.h>
 #include <iostream>
 #include <memory>
 #include <optional>
@@ -68,7 +69,7 @@ void command_receiver::recieve_loop()
     {
         ROS_DEBUG_STREAM("run starts.");
         ROS_INFO_STREAM("Waiting connection from user application.");
-        boost::asio::ip::tcp::acceptor acceptor(this->io, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 50010));
+        boost::asio::ip::tcp::acceptor acceptor(this->io, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 50011));
         boost::asio::ip::tcp::socket socket(this->io);
         acceptor.accept(socket);
         ROS_INFO_STREAM(socket.remote_endpoint());
@@ -187,17 +188,16 @@ techman::~techman()
 
 std::string techman::convert_to_tm_script(std::vector<float> vel_commands)
 {
-    std::vector<float> tm_commands;
     if (vel_commands.size() != 6)
     {
         ROS_WARN_STREAM("The size of given velocity commands is " << vel_commands.size() << "."
                                                                   << "That size must be 6. The tm script that all elements are zero is created.");
-        tm_commands = {0, 0, 0, 0, 0, 0};
+        vel_commands = {0, 0, 0, 0, 0, 0};
     }
     std::stringstream tm_msgs;
     tm_msgs << "SetContinueVLine(" << std::fixed << std::setprecision(5)
-            << tm_commands.at(0) << "," << tm_commands.at(1) << "," << tm_commands.at(2) << ","
-            << tm_commands.at(3) << "," << tm_commands.at(4) << "," << tm_commands.at(5) << ")";
+            << vel_commands.at(0) << "," << vel_commands.at(1) << "," << vel_commands.at(2) << ","
+            << vel_commands.at(3) << "," << vel_commands.at(4) << "," << vel_commands.at(5) << ")" << std::endl;
 
     return tm_msgs.str();
 }
@@ -221,6 +221,10 @@ void techman::send_script(const std::string velocity_script)
 
 int main(int argc, char *argv[])
 {
+
+    google::InitGoogleLogging(argv[0]);
+    google::InstallFailureSignalHandler();
+
     ros::init(argc, argv, "techman_control_bridge_node");
     ros::NodeHandle node_handle;
     ros::Rate control_interval(100);
@@ -232,7 +236,9 @@ int main(int argc, char *argv[])
 
     const int velocity_command_receive_port = 50010;
     command_receiver rec(velocity_command_receive_port);
-    rec.run();
+    ROS_DEBUG_STREAM("before thread runs");
+    std::thread rec_th(&command_receiver::recieve_loop, &rec);
+    ROS_DEBUG_STREAM("after thread runs");
 
     techman arm(node_handle);
 
@@ -240,9 +246,12 @@ int main(int argc, char *argv[])
     {
         arm.send_script(arm.convert_to_tm_script(rec.received_commands));
 
+        ROS_DEBUG_STREAM("spin once");
         ros::spinOnce();
         control_interval.sleep();
     }
+
+    rec_th.join();
 
     return 0;
 }
