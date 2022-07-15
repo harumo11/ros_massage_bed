@@ -230,11 +230,11 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "techman_control_bridge_node");
     ros::NodeHandle node_handle;
     ros::Rate control_interval(100);
-    ROS_DEBUG_STREAM("Techman control bridge starts");
     if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug))
     {
         ros::console::notifyLoggerLevelsChanged();
     }
+    ROS_DEBUG_STREAM("Techman control bridge starts");
 
     const int velocity_command_receive_port = 50011;
     command_receiver rec(velocity_command_receive_port);
