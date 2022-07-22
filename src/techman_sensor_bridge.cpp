@@ -77,8 +77,9 @@ int main(int argc, char *argv[])
 
     while (ros::ok())
     {
-        control_hz.sleep();
+        ROS_INFO_STREAM(tool_pose.flatten());
         ros::spinOnce();
+        control_hz.sleep();
     }
 
     return 0;
