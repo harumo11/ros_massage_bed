@@ -55,6 +55,8 @@ public:
 
     void prepare()
     {
+        this->socket.close();
+        std::cout << "||| Waiting for the connection form user application." << std::endl;
         boost::asio::ip::tcp::acceptor acceptor(this->actx, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), this->my_port));
         acceptor.accept(this->socket);
         ROS_INFO_STREAM("Remote info : " << this->socket.remote_endpoint());
