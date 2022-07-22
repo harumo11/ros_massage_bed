@@ -74,6 +74,9 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "test_techman_sensor_bridge");
     ros::NodeHandle node_handle;
     ros::Rate control_hz(100);
+    ROS_INFO_STREAM("Waiting for tool_pose message");
+    ros::topic::waitForMessage<geometry_msgs::PoseStamped>("tool_pose");
+    ROS_INFO_STREAM("Confirmed tool_pose message");
 
     EEFListener tool_pose;
     ros::Subscriber tool_pose_subscriber = node_handle.subscribe("tool_pose", 1, &EEFListener::callback, &tool_pose);
@@ -82,7 +85,17 @@ int main(int argc, char *argv[])
     while (ros::ok())
     {
         ROS_INFO_STREAM(tool_pose.flatten());
-        sender.write(tool_pose.flatten());
+
+        try
+        {
+            sender.write(tool_pose.flatten());
+        }
+        catch (const boost::system::system_error &e)
+        {
+            ROS_WARN_STREAM(e.what());
+            sender.prepare();
+        }
+
         ros::spinOnce();
         control_hz.sleep();
     }
