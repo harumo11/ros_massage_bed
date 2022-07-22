@@ -69,7 +69,7 @@ public:
 
 int main(int argc, char *argv[])
 {
-    ros::init(argc, argv, "techman_sensor_bridge");
+    ros::init(argc, argv, "test_techman_sensor_bridge");
     ros::NodeHandle node_handle;
     ros::Rate control_hz(100);
 
