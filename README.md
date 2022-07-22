@@ -46,3 +46,13 @@ The source code below are convenient if you get problems and used in order to ve
 - [Boost ](https://www.boost.org/)
 - [Poco](https://pocoproject.org/)
 
+
+
+## 3. Commands
+
+#### 1. Run techman node
+
+```shell
+roslaunch tm5_900_moveit_config tm5_900_moveit_planning_execution.launch sim:=false robot_ip:=192.168.10.2
+```
+
