@@ -61,8 +61,9 @@ public:
         ROS_INFO_STREAM("Connection estublished with user application");
     };
 
-    void write(const std::string msg){
-        //TODO send something here.
+    void write(const std::string msg)
+    {
+        boost::asio::write(this->socket, boost::asio::buffer(msg));
     };
 };
 
@@ -74,10 +75,12 @@ int main(int argc, char *argv[])
 
     EEFListener tool_pose;
     ros::Subscriber tool_pose_subscriber = node_handle.subscribe("tool_pose", 1, &EEFListener::callback, &tool_pose);
+    CommandSender sender;
 
     while (ros::ok())
     {
         ROS_INFO_STREAM(tool_pose.flatten());
+        sender.write(tool_pose.flatten());
         ros::spinOnce();
         control_hz.sleep();
     }
