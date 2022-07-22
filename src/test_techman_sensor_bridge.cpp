@@ -14,7 +14,7 @@ int main(void)
         try
         {
             socket.connect(boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 50012));
-            std::cout << "Connection is established" << std::endl;
+            std::cout << "Connection is estublished" << std::endl;
             break;
         }
         catch (const boost::system::system_error &e)
