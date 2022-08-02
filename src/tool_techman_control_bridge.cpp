@@ -11,30 +11,32 @@
 #include <string>
 #include <utility>
 
-int main(int argc, char const* argv[])
+int main(int argc, char const *argv[])
 {
     boost::asio::io_context actx;
     boost::asio::ip::tcp::socket socket(actx);
     boost::asio::ip::tcp::endpoint client_address(boost::asio::ip::make_address("127.0.0.1"), 50011);
+    std::cout << "||| Try to connect techman_control_bridge. Did you run techman_control_bridge using following command" << std::endl;
+    std::cout << "rosrun ros_massage_bed techman_control_bridge" << std::endl;
     socket.connect(client_address);
 
     // GL 3.2 + GLSL 150
-    const char* glsl_version = "#version 130";
+    const char *glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Create window with graphic context
-    ImVec2 window_size = { 640, 480 };
+    ImVec2 window_size = {640, 480};
     glfwInit();
-    GLFWwindow* window = glfwCreateWindow(window_size.x, window_size.y, "Dashboard for Bed System", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(window_size.x, window_size.y, "Dashboard for Bed System", nullptr, nullptr);
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // enable vsync
 
     // set up dear imgui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
 
     // set up dear imgui style
     ImGui::StyleColorsLight();
@@ -48,7 +50,8 @@ int main(int argc, char const* argv[])
     ImVec4 clear_color = ImVec4(0.3, 0.3, 0.3, 1);
 
     // main loop
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         // get event
         glfwPollEvents();
 
@@ -82,7 +85,8 @@ int main(int argc, char const* argv[])
             ImGui::Dummy(ImVec2(0.0, 20.0));
             ImGui::SliderFloat("Angular velocity yow   [rad/s]", &slider_w_vel_value, -0.01, 0.01);
             ImGui::Dummy(ImVec2(0.0, 20.0));
-            if (ImGui::Button("Reset")) {
+            if (ImGui::Button("Reset"))
+            {
                 slider_x_vel_value = 0;
                 slider_y_vel_value = 0;
                 slider_z_vel_value = 0;
