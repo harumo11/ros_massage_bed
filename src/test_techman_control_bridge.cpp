@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
     while (true) {
         std::string command = "VELC0.00,0.00,0.01,0.00,0.00,0.00:";
         std::cout << "sending command : " << command << std::endl;
-        stream << command << std::endl;
+        stream << command;
         //auto send_size = socket.sendBytes(command.c_str(), command.size());
         //std::cout << "sending command size : " << send_size << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
