@@ -23,7 +23,7 @@ public:
     std::vector<float> received_commands = {0, 0, 0, 0, 0, 0};
     bool stop = false;
     unsigned int user_socket_port_num;
-    std::optional<std::vector<float>> parse_message(const std::string received_msg);
+    std::optional<std::vector<float>> try_split_six_commands(const std::string received_msg);
     boost::asio::io_context io;
 
 private:
@@ -37,7 +37,7 @@ command_receiver::command_receiver(const unsigned int port)
     ROS_DEBUG_STREAM("command receiver starts");
 }
 
-std::optional<std::vector<float>> command_receiver::parse_message(const std::string received_msg)
+std::optional<std::vector<float>> command_receiver::try_split_six_commands(const std::string received_msg)
 {
     ROS_DEBUG_STREAM("parse message starts.");
     std::string msg_header_removed = received_msg.substr(received_msg.find_first_of(this->header) + this->header.size());
@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
                 break;
             }
 
-            auto parsed_velocity_commands = rec.parse_message(data);
+            auto parsed_velocity_commands = rec.try_split_six_commands(data);
             if (parsed_velocity_commands.has_value())
             {
                 ROS_DEBUG_STREAM("Received massage can be splited into six velocity commands successfully.");
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                ROS_WARN_STREAM("parse NOT success! Velocity commands are set all zero");
+                ROS_WARN_STREAM("Parse NOT success! Velocity commands are set all zero");
                 rec.received_commands.assign({0, 0, 0, 0, 0, 0});
             }
 
