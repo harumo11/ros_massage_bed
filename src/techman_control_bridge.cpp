@@ -197,7 +197,6 @@ int main(int argc, char *argv[])
             {
                 boost::asio::read_until(socket, boost::asio::dynamic_buffer(data), ":");
                 ROS_WARN_STREAM("received data: " << data);
-                //boost::asio::read_until(socket, boost::asio::dynamic_buffer(data), "\n");
             }
             catch (boost::system::system_error &e)
             {
