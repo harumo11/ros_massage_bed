@@ -98,7 +98,8 @@ int main(int argc, char const* argv[])
             slider_p_vel_value *= 0.01;
             slider_w_vel_value *= 0.01;
             std::stringstream tm_msgs;
-            tm_msgs << std::fixed << std::setprecision(5) << "VELC" << slider_x_vel_value << "," << slider_y_vel_value << "," << slider_z_vel_value << "," << slider_r_vel_value << "," << slider_p_vel_value << "," << slider_w_vel_value << ":" << std::endl;
+            //tm_msgs << std::fixed << std::setprecision(5) << "VELC" << slider_x_vel_value << "," << slider_y_vel_value << "," << slider_z_vel_value << "," << slider_r_vel_value << "," << slider_p_vel_value << "," << slider_w_vel_value << ":" << std::endl;
+            tm_msgs << std::fixed << std::setprecision(5) << "VELC" << slider_x_vel_value << "," << slider_y_vel_value << "," << slider_z_vel_value << "," << slider_r_vel_value << "," << slider_p_vel_value << "," << slider_w_vel_value << ":";
             std::cout << tm_msgs.str() << std::endl;
             boost::asio::write(socket, boost::asio::buffer(tm_msgs.str()));
         }
