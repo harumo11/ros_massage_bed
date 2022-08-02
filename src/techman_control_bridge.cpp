@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
             try
             {
                 boost::asio::read_until(socket, boost::asio::dynamic_buffer(data), ":");
-                ROS_WARN_STREAM("received data: " << data);
+                ROS_DEBUG_STREAM("received data:" << data);
             }
             catch (boost::system::system_error &e)
             {
@@ -207,13 +207,12 @@ int main(int argc, char *argv[])
             auto parsed_velocity_commands = rec.parse_message(data);
             if (parsed_velocity_commands.has_value())
             {
-                ROS_DEBUG_STREAM("parse success!");
-                rec.received_commands.at(0) = parsed_velocity_commands.value().at(0);
-                rec.received_commands.at(1) = parsed_velocity_commands.value().at(1);
-                rec.received_commands.at(2) = parsed_velocity_commands.value().at(2);
-                rec.received_commands.at(3) = parsed_velocity_commands.value().at(3);
-                rec.received_commands.at(4) = parsed_velocity_commands.value().at(4);
-                rec.received_commands.at(5) = parsed_velocity_commands.value().at(5);
+                ROS_DEBUG_STREAM("Received massage can be split into six velocity commands successfully.");
+                for (int i = 0; i < 6; i++)
+                {
+                    rec.received_commands.at(i) = parsed_velocity_commands.value().at(i);
+                }
+
                 ROS_INFO_STREAM(rec.received_commands.at(0) << "\t" << rec.received_commands.at(1) << "\t" << rec.received_commands.at(2) << "\t" << rec.received_commands.at(3) << "\t" << rec.received_commands.at(4) << "\t" << rec.received_commands.at(5));
             }
             else
