@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
             auto parsed_velocity_commands = rec.parse_message(data);
             if (parsed_velocity_commands.has_value())
             {
-                ROS_DEBUG_STREAM("Received massage can be split into six velocity commands successfully.");
+                ROS_DEBUG_STREAM("Received massage can be splited into six velocity commands successfully.");
                 for (int i = 0; i < 6; i++)
                 {
                     rec.received_commands.at(i) = parsed_velocity_commands.value().at(i);
