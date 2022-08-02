@@ -67,8 +67,8 @@ class techman
 private:
     tm_msgs::SendScript tm_script;
     ros::ServiceClient service_client;
-    void try_start_velocity_mode(ros::NodeHandle &node_handle);
-    void try_stop_velocity_mode(ros::NodeHandle &node_handle);
+    void try_start_velocity_mode();
+    void try_stop_velocity_mode();
 
 public:
     techman(ros::NodeHandle &node_handle);
@@ -77,11 +77,10 @@ public:
     std::string convert_to_tm_script(std::vector<float> vel_commands);
 };
 
-void techman::try_start_velocity_mode(ros::NodeHandle &node_handle)
+void techman::try_start_velocity_mode()
 {
-    ROS_INFO_STREAM("Connection setting to Techman starts.");
+    ROS_INFO_STREAM("Try to start techman velocity mode.");
 
-    this->service_client = node_handle.serviceClient<tm_msgs::SendScript>("tm_driver/send_script");
     this->tm_script.request.id = "bridge";
     this->tm_script.request.script = "ContinueVLine(500, 1000)"; //stop time ms = 500, break loop ms = 1000
 
@@ -112,16 +111,7 @@ void techman::try_start_velocity_mode(ros::NodeHandle &node_handle)
     ROS_INFO_STREAM("Connection to Techaman is established");
 }
 
-void try_to_stop_velocity_mode(ros::NodeHandle &node_handle)
-{
-}
-
-techman::techman(ros::NodeHandle &node_handle)
-{
-    this->try_start_velocity_mode(node_handle);
-}
-
-techman::~techman()
+void techman::try_stop_velocity_mode()
 {
     ROS_INFO_STREAM("Shutdown process starts");
     this->tm_script.request.script = "StopContinueVmode()";
@@ -137,6 +127,18 @@ techman::~techman()
             ROS_WARN_STREAM("Techman velocity mode can not shutdown.");
         }
     }
+}
+
+techman::techman(ros::NodeHandle &node_handle)
+{
+    this->service_client = node_handle.serviceClient<tm_msgs::SendScript>("tm_driver/send_script");
+    this->try_stop_velocity_mode();
+    this->try_start_velocity_mode();
+}
+
+techman::~techman()
+{
+    this->try_stop_velocity_mode();
 }
 
 std::string techman::convert_to_tm_script(std::vector<float> vel_commands)
