@@ -182,7 +182,6 @@ int main(int argc, char *argv[])
 
     ros::init(argc, argv, "techman_control_bridge_node");
     ros::NodeHandle node_handle;
-    ros::Rate control_interval(100);
     if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug))
     {
         ros::console::notifyLoggerLevelsChanged();
