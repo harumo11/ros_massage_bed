@@ -192,6 +192,9 @@ int main(int argc, char *argv[])
     command_receiver rec(velocity_command_receive_port);
     techman arm(node_handle);
 
+    auto current_time_point = std::chrono::steady_clock::now();
+    auto previous_time_point = std::chrono::steady_clock::now();
+
     while (ros::ok())
     {
         ROS_DEBUG_STREAM("run starts.");
@@ -234,10 +237,16 @@ int main(int argc, char *argv[])
             }
 
             arm.send_script(arm.convert_to_tm_script(rec.received_commands));
+            auto loop_duration = std::chrono::duration<double>((previous_time_point - current_time_point)).count();
+            ROS_INFO_STREAM("Loop duation is: " << loop_duration);
+            previous_time_point = current_time_point;
+            current_time_point = std::chrono::steady_clock::now();
+            ROS_INFO_STREAM("Send velocity command to techman.");
         }
 
         socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
         socket.close();
+        ROS_WARN_STREAM("The used socket is closed successfully.");
     }
     ROS_INFO_STREAM("The connection is closed successfully");
 
