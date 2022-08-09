@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
         }
 
         socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-        socket.close();
+        //socket.close();
         ROS_WARN_STREAM("The used socket is closed successfully.");
     }
     ROS_INFO_STREAM("The connection is closed successfully");
