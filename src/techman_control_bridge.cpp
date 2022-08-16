@@ -88,14 +88,12 @@ void techman::try_start_velocity_mode()
     while (ros::ok())
     {
         ros::Duration interval_try_connection(1);
-        interval_try_connection.sleep();
 
         if (this->service_client.call(this->tm_script))
         {
             if (this->tm_script.response.ok)
             {
                 ROS_INFO_STREAM("Sent script to Techman and The connection is established.");
-                interval_try_connection.sleep();
                 break;
             }
             else
@@ -163,9 +161,10 @@ std::string techman::convert_to_tm_script(std::vector<float> vel_commands)
 
 void techman::send_script(const std::string velocity_script)
 {
+    //this->try_start_velocity_mode();
+
     this->tm_script.response.ok = 0;
     this->tm_script.request.script = velocity_script;
-
     if (this->service_client.call(this->tm_script))
     {
         if (tm_script.response.ok)
@@ -209,7 +208,6 @@ int main(int argc, char *argv[])
         acceptor.accept(socket);
         ROS_INFO_STREAM(socket.remote_endpoint());
         ROS_INFO_STREAM("Connection estublished with user application.");
-        ros::Rate control_loop(100);
 
         while (ros::ok())
         {
@@ -248,7 +246,6 @@ int main(int argc, char *argv[])
             previous_time_point = current_time_point;
             current_time_point = std::chrono::steady_clock::now();
             ROS_INFO_STREAM("Send velocity command to techman.");
-            control_loop.sleep();
         }
 
         socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
