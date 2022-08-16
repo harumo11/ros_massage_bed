@@ -238,7 +238,7 @@ sudo apt install python3-catkin-tools
 ```shell
 cd ~/catkin_ws/src/
 git clone https://github.com/TechmanRobotInc/tmr_ros1.git
-git clone https://github.com/harumo11/ros_massage_bed.git:stable
+git clone --branch stable https://github.com/harumo11/ros_massage_bed.git:stable
 catkin build (環境によってはcatkin makeを使ってください．)
 ```
 
