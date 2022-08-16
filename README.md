@@ -231,6 +231,7 @@ sudo apt build-essential
 sudo apt install libboost-all-dev
 sudo apt install libpoco-dev
 sudo apt install python3-catkin-tools
+sudo apt install libglfw3-dev
 ```
 
 ### 5.2 ROSパッケージのインストール
