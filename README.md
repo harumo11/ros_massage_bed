@@ -227,16 +227,18 @@ rosrun ros_massage_bed test_leptrino_sensor_bridge
 ### 5.1 依存関係のインストール
 
 ```
+sudo apt build-essential
 sudo apt install libboost-all-dev
 sudo apt install libpoco-dev
+sudo apt install python3-catkin-tools
 ```
 
 ### 5.2 ROSパッケージのインストール
 
 ```shell
 cd ~/catkin_ws/src/
+https://github.com/TechmanRobotInc/tmr_ros1.git
 git clone https://github.com/harumo11/ros_massage_bed.git:stable
-sudo apt install python3-catkin-tools
 catkin build (環境によってはcatkin makeを使ってください．)
 ```
 
