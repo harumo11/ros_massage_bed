@@ -107,7 +107,7 @@ SNSE0.00,0.00,0.00,0.00,0.00,0.00:
 ### 2.1 ロボットアームドライバーの起動
 
 ```shell
-roslaunch tm5_900_moveit_config tm5_900_moveit_planning_execution.launch sim:=false robot_ip:=192.168.10.2
+roslaunch tm5-900-moveit-config tm5-900_moveit_planning_execution.launch sim:=false robot_ip:=192.168.10.2
 ```
 
 上記のコマンドによりロボットアームのROSドライバーが立ち上がります．GUIが立ち上がり，現実のロボットとGUI中のロボットが同じ姿勢をとったら接続ができた証拠です．うまく接続できない場合はロボットアームの制御ボックスを再起動してください．
@@ -155,7 +155,7 @@ rosrun ros_massage_bed leptrino_sensor_bridge
 まず，下記のコマンドをROS PCで実行してください．
 
 ```
-roslaunch tm5_900_moveit_config tm5_900_moveit_planning_execution.launch sim:=false robot_ip:=192.168.10.2
+roslaunch tm5-900-moveit-config tm5-900_moveit_planning_execution.launch sim:=false robot_ip:=192.168.10.2
 ```
 
 ```
