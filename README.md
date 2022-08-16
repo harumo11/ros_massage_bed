@@ -241,7 +241,13 @@ sudo apt install libgoogle-glog-dev
 cd ~/catkin_ws/src/
 git clone https://github.com/TechmanRobotInc/tmr_ros1.git
 git clone --branch stable https://github.com/harumo11/ros_massage_bed.git:stable
+```
+```
 git clone https://github.com/harumo11/leptrino_force_torque.git
-catkin build (環境によってはcatkin makeを使ってください．)
+cd leptrino_force_torque
+sudo cp 99-leptorino.rules /etc/udev/rules.d/
 ```
 
+```
+catkin build (環境によってはcatkin makeを使ってください．)
+```
