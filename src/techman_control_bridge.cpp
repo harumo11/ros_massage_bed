@@ -81,18 +81,21 @@ void techman::try_start_velocity_mode()
 {
     ROS_INFO_STREAM("Try to start techman velocity mode.");
 
+    this->tm_script.response.ok = 0;
     this->tm_script.request.id = "bridge";
-    this->tm_script.request.script = "ContinueVLine(500, 1000)"; //stop time ms = 500, break loop ms = 1000
+    this->tm_script.request.script = "ContinueVLine(50, 1000)"; //stop time ms = 500, break loop ms = 1000
 
     while (ros::ok())
     {
         ros::Duration interval_try_connection(1);
+        interval_try_connection.sleep();
 
         if (this->service_client.call(this->tm_script))
         {
             if (this->tm_script.response.ok)
             {
                 ROS_INFO_STREAM("Sent script to Techman and The connection is established.");
+                interval_try_connection.sleep();
                 break;
             }
             else
@@ -114,6 +117,7 @@ void techman::try_start_velocity_mode()
 void techman::try_stop_velocity_mode()
 {
     ROS_INFO_STREAM("Shutdown process starts");
+    this->tm_script.response.ok = 0;
     this->tm_script.request.script = "StopContinueVmode()";
 
     if (this->service_client.call(this->tm_script))
@@ -159,6 +163,7 @@ std::string techman::convert_to_tm_script(std::vector<float> vel_commands)
 
 void techman::send_script(const std::string velocity_script)
 {
+    this->tm_script.response.ok = 0;
     this->tm_script.request.script = velocity_script;
 
     if (this->service_client.call(this->tm_script))
@@ -204,6 +209,7 @@ int main(int argc, char *argv[])
         acceptor.accept(socket);
         ROS_INFO_STREAM(socket.remote_endpoint());
         ROS_INFO_STREAM("Connection estublished with user application.");
+        ros::Rate control_loop(100);
 
         while (ros::ok())
         {
@@ -237,11 +243,12 @@ int main(int argc, char *argv[])
             }
 
             arm.send_script(arm.convert_to_tm_script(rec.received_commands));
-            auto loop_duration = std::chrono::duration<double>((previous_time_point - current_time_point)).count();
+            auto loop_duration = std::chrono::duration<double>((current_time_point - previous_time_point)).count();
             ROS_INFO_STREAM("Loop duation is: " << loop_duration);
             previous_time_point = current_time_point;
             current_time_point = std::chrono::steady_clock::now();
             ROS_INFO_STREAM("Send velocity command to techman.");
+            control_loop.sleep();
         }
 
         socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
