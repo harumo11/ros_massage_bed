@@ -16,12 +16,13 @@
 #include <tm_msgs/SendScript.h>
 #include <vector>
 
-class command_receiver {
+class command_receiver
+{
 public:
     command_receiver(const unsigned int port);
     void recieve_loop();
     void run();
-    std::vector<float> received_commands = { 0, 0, 0, 0, 0, 0 };
+    std::vector<float> received_commands = {0, 0, 0, 0, 0, 0};
     bool stop = false;
     unsigned int user_socket_port_num;
 
@@ -47,14 +48,18 @@ std::optional<std::vector<float>> command_receiver::parse_message(const std::str
     boost::char_separator<char> comma(",");
     boost::tokenizer<boost::char_separator<char>> tokenizer(msg_footer_removed, comma);
     std::vector<float> velocity_commands;
-    for (auto command : tokenizer) {
+    for (auto command : tokenizer)
+    {
         velocity_commands.push_back(std::stof(command));
     }
 
-    if (velocity_commands.size() != 6) {
+    if (velocity_commands.size() != 6)
+    {
         ROS_WARN_STREAM("Recieved commands size should be 6. But " << velocity_commands.size() << " is given.");
         return std::nullopt;
-    } else {
+    }
+    else
+    {
         return velocity_commands;
     }
 }
@@ -62,7 +67,8 @@ std::optional<std::vector<float>> command_receiver::parse_message(const std::str
 void command_receiver::recieve_loop()
 {
 
-    while (ros::ok()) {
+    while (ros::ok())
+    {
         ROS_DEBUG_STREAM("run starts.");
         ROS_INFO_STREAM("Waiting connection from user application.");
         boost::asio::ip::tcp::acceptor acceptor(this->io, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), this->user_socket_port_num));
@@ -71,17 +77,22 @@ void command_receiver::recieve_loop()
         ROS_INFO_STREAM(socket.remote_endpoint());
         ROS_INFO_STREAM("Connection estublished with user application.");
 
-        while (ros::ok()) {
+        while (ros::ok())
+        {
             std::string data;
-            try {
+            try
+            {
                 boost::asio::read_until(socket, boost::asio::dynamic_buffer(data), ":");
-            } catch (boost::system::system_error& e) {
+            }
+            catch (boost::system::system_error &e)
+            {
                 ROS_ERROR_STREAM(e.what());
                 break;
             }
 
             auto parsed_velocity_commands = this->parse_message(data);
-            if (parsed_velocity_commands.has_value()) {
+            if (parsed_velocity_commands.has_value())
+            {
                 ROS_DEBUG_STREAM("parse success!");
                 this->received_commands.at(0) = parsed_velocity_commands.value().at(0);
                 this->received_commands.at(1) = parsed_velocity_commands.value().at(1);
@@ -90,9 +101,11 @@ void command_receiver::recieve_loop()
                 this->received_commands.at(4) = parsed_velocity_commands.value().at(4);
                 this->received_commands.at(5) = parsed_velocity_commands.value().at(5);
                 ROS_INFO_STREAM(this->received_commands.at(0) << "\t" << this->received_commands.at(1) << "\t" << this->received_commands.at(2) << "\t" << this->received_commands.at(3) << "\t" << this->received_commands.at(4) << "\t" << this->received_commands.at(5));
-            } else {
+            }
+            else
+            {
                 ROS_WARN_STREAM("parse NOT success! Velocity commands are set all zero");
-                this->received_commands.assign({ 0, 0, 0, 0, 0, 0 });
+                this->received_commands.assign({0, 0, 0, 0, 0, 0});
             }
         }
 
@@ -109,38 +122,71 @@ void command_receiver::run()
     th.join();
 }
 
-class techman {
+class techman
+{
 private:
     tm_msgs::SendScript tm_script;
     ros::ServiceClient service_client;
 
 public:
-    techman(ros::NodeHandle& node_handle);
+    techman(ros::NodeHandle &node_handle);
     ~techman();
     void send_script(const std::string velocity_script);
+    void stop_velocity_mode();
     std::string convert_to_tm_script(std::vector<float> vel_commands);
 };
 
-techman::techman(ros::NodeHandle& node_handle)
+void techman::stop_velocity_mode()
+{
+    ROS_INFO_STREAM("stop velocity mode");
+    this->tm_script.request.id = "bridge";
+    this->tm_script.response.ok = 0;
+    this->tm_script.request.script = "StopContinueVmode()";
+
+    if (this->service_client.call(this->tm_script))
+    {
+        if (this->tm_script.response.ok)
+        {
+            ROS_INFO_STREAM("Techman velocity mode shutdown");
+        }
+        else
+        {
+            ROS_WARN_STREAM("Techman velocity mode can not shutdown");
+        }
+    }
+}
+
+techman::techman(ros::NodeHandle &node_handle)
 {
     ROS_INFO_STREAM("Connection setting to Techman starts.");
 
     this->service_client = node_handle.serviceClient<tm_msgs::SendScript>("tm_driver/send_script");
     this->tm_script.request.id = "bridge";
+
+    // stop velocity mode before start that mode.
+    this->stop_velocity_mode();
+
     this->tm_script.request.script = "ContinueVLine(50, 1000)";
 
-    while (ros::ok()) {
-        ros::Duration interval_try_connection(1);
+    while (ros::ok())
+    {
+        ros::Duration interval_try_connection(0.5);
 
-        if (this->service_client.call(this->tm_script)) {
-            if (this->tm_script.response.ok) {
+        if (this->service_client.call(this->tm_script))
+        {
+            if (this->tm_script.response.ok)
+            {
                 ROS_INFO_STREAM("Sent script to Techman and The connection is established.");
                 break;
-            } else {
+            }
+            else
+            {
                 ROS_ERROR_STREAM("Sent script to Techman, but response not yet ok. Exit.");
                 interval_try_connection.sleep();
             }
-        } else {
+        }
+        else
+        {
             ROS_ERROR_STREAM("Can not send script. Is techman node running? Exit.");
             interval_try_connection.sleep();
         }
@@ -154,10 +200,14 @@ techman::~techman()
     ROS_INFO_STREAM("Shutdown process starts");
     this->tm_script.request.script = "StopContinueVmode()";
 
-    if (this->service_client.call(this->tm_script)) {
-        if (tm_script.response.ok) {
+    if (this->service_client.call(this->tm_script))
+    {
+        if (tm_script.response.ok)
+        {
             ROS_INFO_STREAM("Techman velocity mode shutdown.");
-        } else {
+        }
+        else
+        {
             ROS_WARN_STREAM("Techman velocity mode can not shutdown.");
         }
     }
@@ -165,10 +215,11 @@ techman::~techman()
 
 std::string techman::convert_to_tm_script(std::vector<float> vel_commands)
 {
-    if (vel_commands.size() != 6) {
+    if (vel_commands.size() != 6)
+    {
         ROS_WARN_STREAM("The size of given velocity commands is " << vel_commands.size() << "."
                                                                   << "That size must be 6. The tm script that all elements are zero is created.");
-        vel_commands = { 0, 0, 0, 0, 0, 0 };
+        vel_commands = {0, 0, 0, 0, 0, 0};
     }
     std::stringstream tm_msgs;
     tm_msgs << "SetContinueVLine(" << std::fixed << std::setprecision(5)
@@ -182,17 +233,21 @@ void techman::send_script(const std::string velocity_script)
 {
     this->tm_script.request.script = velocity_script;
 
-    if (this->service_client.call(this->tm_script)) {
-        if (tm_script.response.ok) {
+    if (this->service_client.call(this->tm_script))
+    {
+        if (tm_script.response.ok)
+        {
             //ROS_INFO_STREAM("Sent velocity command script successfully");
             ROS_INFO_STREAM_THROTTLE(5, "Sent velocity command script successfully");
         }
-    } else {
+    }
+    else
+    {
         ROS_WARN_STREAM("Sent velocity command script, but resposen not ok.");
     }
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
 
     google::InitGoogleLogging(argv[0]);
@@ -201,7 +256,8 @@ int main(int argc, char* argv[])
     ros::init(argc, argv, "techman_control_bridge_node");
     ros::NodeHandle node_handle;
     ros::Rate control_interval(100);
-    if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug)) {
+    if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug))
+    {
         ros::console::notifyLoggerLevelsChanged();
     }
     ROS_DEBUG_STREAM("Techman control bridge starts");
@@ -214,7 +270,8 @@ int main(int argc, char* argv[])
 
     techman arm(node_handle);
 
-    while (ros::ok()) {
+    while (ros::ok())
+    {
         arm.send_script(arm.convert_to_tm_script(rec.received_commands));
 
         ros::spinOnce();
