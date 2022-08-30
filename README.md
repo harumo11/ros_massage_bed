@@ -270,3 +270,16 @@ catkin build (環境によってはcatkin makeを使ってください．)
   ```
   rosrun ros_massage_bed simple_force_massage
   ```
+
+- 'move_positions.py'
+  このプログラムはロボットの手先を所望の位置に移動させるプログラムです．プログラムの１４行目を書き換えて，`python3 move_position.py`を実行すると，その位置へロボットがゆっくり移動します．ただ，実行する前に`techman_control_bridge`は切っておいてください．おそらく，`techman_control_bridge`が立ち上がっていると，`move_position.py`のほうは実行できません．`
+  一連の実行方法は下記のとおりです．
+  ```
+  roslaunch tm5_900_moveit_config tm5_900_moveit_planning_execution.launch sim:=false robot_ip:=192.168.10.2
+  ```
+  ```
+  roscd ros_massage_bed/src/
+  ```
+  ```
+  python3 move_position.py
+  ```
